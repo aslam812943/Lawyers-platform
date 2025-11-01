@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from 'cors'
 import userRoutes from './src/interface/routes/user/  userRoutes'
 import { DbConnection } from './src/config/mongoose/DbConnection'
+import lawyerRouts from './src/interface/routes/lawyer/lawyerRoutes'
+
 
 dotenv.config();
 
@@ -18,6 +20,8 @@ app.use(cors({
 }));
 
 app.use("/api/user", userRoutes);
+app.use('/api/lawyer',lawyerRouts)
+
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

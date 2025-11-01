@@ -6,12 +6,15 @@ export class UserRegisterDTO {
   isVerified?: boolean;
   role: string;
   
+
+  
+  
   constructor(data: Partial<UserRegisterDTO>) {
   
 
-    if (!data.name ) {
-      console.log('name')
-      throw new Error("Name must start with a capital letter, contain only letters, and be max 15 characters");
+    if (!data.name||data.name.length<4 ) {
+     
+      throw new Error(" contain only letters, and be min 4 to  max 15 characters");
     }
 
     const phoneRegex = /^[0-9]{10}$/;
@@ -40,4 +43,6 @@ export class UserRegisterDTO {
     this.role = data.role || "user";
 
   }
+
+  
 }

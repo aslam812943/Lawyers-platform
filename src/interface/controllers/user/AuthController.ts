@@ -23,6 +23,7 @@ export class AuthController {
 
 async registerUser(req: Request, res: Response): Promise<void> {
   try {
+    console.log('authController.ts')
  const dto = new UserRegisterDTO(req.body)
     const result = await this._registerUserCase.execute(dto);
     res.status(HttpStatusCode.CREATED).json({ success: true, message: result.message });
@@ -86,17 +87,50 @@ res.status(HttpStatusCode.BAD_REQUEST).json({success:false,message: err.message}
   }
 }
 
-async loginUser(req: Request,res:Response):Promise<void>{
-  try{
 
-    const dto = new LoginUserDTO(req.body)
-    const {token,user} = await this._loginUserUsecase.execute(dto);
-    console.log(user,token)
-    res.status(HttpStatusCode.OK).json({success:true,token,user});
-  }catch(err:any){
+
+async loginUser(req: Request, res: Response): Promise<void> {
+  try {
+    const dto = new LoginUserDTO(req.body);
+
+   
+    const { token, refreshToken, user } = await this._loginUserUsecase.execute(dto);
+
+    res.cookie("authToken", token, {
+      httpOnly: true,
+       secure:false,
+      //  process.env.NODE_ENV === "production",
+      // sameSite: "strict",
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+   
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure:false,
+      // process.env.NODE_ENV === "production",
+      // sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+  
+    res.status(HttpStatusCode.OK).json({
+      success: true,
+      token,
+      refreshToken,
+      user
+    });
     
-    res.status(HttpStatusCode.UNAUTHORIZED).json({success:false,message:err.message})
+  } catch (err: any) {
+    res.status(HttpStatusCode.UNAUTHORIZED).json({
+      success: false,
+      message: err.message
+    });
   }
 }
+
+
+
+
 
 }

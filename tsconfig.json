@@ -12,7 +12,7 @@
     "skipLibCheck": true,                        // Skip type checking of all declaration files
     "forceConsistentCasingInFileNames": true,   // Ensure consistent casing
     "noImplicitAny": true,                       // Raise error on implicit any types
-    "noUnusedLocals": true,                      // Check for unused variables
+    "noUnusedLocals": false,                      // Check for unused variables
     "noUnusedParameters": true,                  // Check for unused function parameters
     "sourceMap": true                            // Enable source maps for debugging
   },

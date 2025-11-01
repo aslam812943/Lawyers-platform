@@ -1,11 +1,11 @@
-import { UserRegisterDTO } from "../../dtos/user/ RegisterUserDTO"; 
-import { IUserRepository } from "../../../domain/repositories/user/ IUserRepository"; 
-import { IRegisterUserUseCase } from "../../interface/user/IRegisterUserUseCase"; 
+import { UserRegisterDTO } from "../../dtos/user/ RegisterUserDTO";
+import { IUserRepository } from "../../../domain/repositories/user/ IUserRepository";
+import { IRegisterUserUseCase } from "../../interface/user/IRegisterUserUseCase";
 import { GenerateOtpUseCase } from "./GenerateOtpUseCase";
 import { NodeMailerEmailService } from "../../../infrastructure/services/nodeMailer/NodeMailerEmailService";
 
 export class RegisterUserUsecase implements IRegisterUserUseCase {
-  constructor(private _userRepo: IUserRepository,private _generateOptUseCase:GenerateOtpUseCase,private _mailService:NodeMailerEmailService) {}
+  constructor(private _userRepo: IUserRepository, private _generateOptUseCase: GenerateOtpUseCase, private _mailService: NodeMailerEmailService) { }
 
   async execute(data: UserRegisterDTO): Promise<{ message: string }> {
     const existingUser = await this._userRepo.findByEmail(data.email);
@@ -13,7 +13,7 @@ export class RegisterUserUsecase implements IRegisterUserUseCase {
       throw new Error("User already exists");
     }
 
-    const otp = await this._generateOptUseCase.execute(data.email,data);
+    const otp = await this._generateOptUseCase.execute(data.email, data);
 
     await this._mailService.sendMail(
       data.email,
@@ -22,8 +22,8 @@ export class RegisterUserUsecase implements IRegisterUserUseCase {
     )
 
 
-    return {message:'OTP sent successfully'}
+    return { message: 'OTP sent successfully' }
   }
 
- 
+
 }

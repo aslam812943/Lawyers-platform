@@ -6,27 +6,27 @@ import { ForgetPasswordRequestDTO } from "../../dtos/user/ForgetPasswordRequestD
 
 
 
-export class RequestForgetPasswordUseCase{
-    constructor(private _userRepo:IUserRepository,private _otpService:OtpService,private _mailService:NodeMailerEmailService){}
+export class RequestForgetPasswordUseCase {
+    constructor(private _userRepo: IUserRepository, private _otpService: OtpService, private _mailService: NodeMailerEmailService) { }
 
-async execute(data:ForgetPasswordRequestDTO):Promise<string>{
-    const user = await this._userRepo.findByEmail(data.email);
-   
-    if(!user) throw new Error('User not found');
+    async execute(data: ForgetPasswordRequestDTO): Promise<string> {
+        const user = await this._userRepo.findByEmail(data.email);
 
-const otp  = await this._otpService.generateOtp(data.email,{
-    email:data.email,
-    userId:user.id
-})
+        if (!user) throw new Error('User not found');
 
- // Send OTP via email
-    await this._mailService.sendMail(
-      data.email,
-      "Password Reset OTP",
-      `<h2>Your password reset OTP is ${otp}</h2>`
-    );
-    return "Password reset OTP sent successfully.";
+        const otp = await this._otpService.generateOtp(data.email, {
+            email: data.email,
+            userId: user.id
+        })
 
-}
+        // Send OTP via email
+        await this._mailService.sendMail(
+            data.email,
+            "Password Reset OTP",
+            `<h2>Your password reset OTP is ${otp}</h2>`
+        );
+        return "Password reset OTP sent successfully.";
+
+    }
 
 }

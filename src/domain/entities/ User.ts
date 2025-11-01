@@ -6,4 +6,6 @@ export interface User {
   phone: number;
   isVerified: boolean;
   role: string;
+  hasSubmittedVerification:boolean;
+  
 }

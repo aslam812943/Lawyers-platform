@@ -7,4 +7,5 @@ export interface IUserRepository {
   findByEmail(email: string): Promise<User | null>;
   verifyUser(userId:string):Promise<void>;
   updateUserPassword(userId:string,hashedPassword:string):Promise<void>
+   markVerificationSubmitted(userId: string): Promise<void>;
 }

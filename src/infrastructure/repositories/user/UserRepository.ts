@@ -1,8 +1,8 @@
-import { UserRegisterDTO } from "../../application/dtos/user/ RegisterUserDTO"; 
-import { User } from "../../domain/entities/ User"; 
-import { IUserRepository } from "../../domain/repositories/user/ IUserRepository";
-import UserModel, { IUserDocument } from "../db/models/ UserModel";
-import { BaseRepository } from "./BaseRepository";
+import { UserRegisterDTO } from "../../../application/dtos/user/ RegisterUserDTO";
+import { User } from "../../../domain/entities/ User"; 
+import { IUserRepository } from "../../../domain/repositories/user/ IUserRepository"; 
+import UserModel, { IUserDocument } from "../../db/models/ UserModel";
+import { BaseRepository } from "../user/BaseRepository";
 
 
 export class UserRepository extends BaseRepository<IUserDocument> implements IUserRepository {
@@ -23,6 +23,7 @@ export class UserRepository extends BaseRepository<IUserDocument> implements IUs
       phone: userDoc.phone,
       isVerified: userDoc.isVerified,
       role: userDoc.role,
+       hasSubmittedVerification: userDoc.hasSubmittedVerification ?? false, 
     };
   }
 
@@ -37,11 +38,18 @@ export class UserRepository extends BaseRepository<IUserDocument> implements IUs
       phone: userDoc.phone,
       isVerified: userDoc.isVerified,
       role: userDoc.role,
+      hasSubmittedVerification: userDoc.hasSubmittedVerification ?? false, 
     };
   }
 
 
 async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
     await this.update(userId, { password: hashedPassword });
+  }
+
+
+
+    async markVerificationSubmitted(userId: string): Promise<void> {
+    await this.update(userId, { hasSubmittedVerification: true });
   }
 }
