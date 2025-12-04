@@ -5,6 +5,7 @@
 
 export interface IGetAllLawyerDTO {
   id: string;
+  userId:string;
   name: string;
   email: string;
   phone: string;
@@ -33,6 +34,7 @@ export interface IGetAllLawyerDTO {
 }
 export class ResponseGetLawyersDTO{
    id: string;
+   userId:string;
      name: string;
      email: string;
      phone: string;
@@ -43,6 +45,7 @@ export class ResponseGetLawyersDTO{
    
      constructor(data: IGetAllLawyerDTO) {
        this.id = data.id;
+       this.userId = data.userId
        this.name = data.name;
        this.email = data.email;
        this.phone = data.phone??'';

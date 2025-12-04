@@ -13,7 +13,8 @@ export interface IAvailabilityRule extends Document{
   slotDuration: number,
   maxBookings: number,
   sessionType: string,
-  exceptionDays: [string]
+  exceptionDays: [string],
+   consultationFee:string
 }
 
 
@@ -29,7 +30,8 @@ title:String,
   slotDuration: Number,
   maxBookings: Number,
   sessionType: String,
-  exceptionDays: [String]
+  exceptionDays: [String],
+   consultationFee:String
 },{timestamps:true})
 
 

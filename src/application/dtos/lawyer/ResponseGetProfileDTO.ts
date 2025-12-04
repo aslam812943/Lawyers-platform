@@ -13,6 +13,7 @@ export class ResponseGetProfileDTO{
         public email:string,
         public phone:number,
         public profileImage?:string,
-        public bio?:string
+        public bio?:string,
+        public isPassword?:boolean
     ){}
 }

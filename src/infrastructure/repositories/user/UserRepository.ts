@@ -47,6 +47,7 @@ export class UserRepository
         role: userDoc.role,
         isBlock: userDoc.isBlock,
         hasSubmittedVerification: userDoc.hasSubmittedVerification ?? false,
+        isPassword:userDoc.password?true:false
       };
     } catch (error: any) {
 
@@ -183,7 +184,8 @@ export class UserRepository
         isBlock: doc.isBlock,
         hasSubmittedVerification: doc.hasSubmittedVerification ?? false,
         profileImage: doc.profileImage ?? '',
-        address: doc.address
+        address: doc.address,
+        isPassword:doc.password?true:false
       };
     } catch (error: any) {
       throw new Error('findById failed: ' + (error.message || error));

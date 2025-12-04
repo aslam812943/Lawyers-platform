@@ -1,5 +1,5 @@
 
-import { Request, Response } from "express";
+import { Request, Response,NextFunction } from "express";
 import { IRegisterUserUseCase } from "../../../application/interface/user/IRegisterUserUseCase";
 import { HttpStatusCode } from "../../../infrastructure/interface/enums/HttpStatusCode";
 import { VerifyOtpUseCase } from "../../../application/useCases/user/auth/VerifyOtpUseCase";
@@ -11,6 +11,7 @@ import { RequestForgetPasswordUseCase } from "../../../application/useCases/user
 import { VerifyResetPasswordUseCase } from "../../../application/useCases/user/auth/VerifyResetPasswordUseCase";
 import { UserRegisterDTO } from "../../../application/dtos/user/ RegisterUserDTO";
 import { GoogleAuthUsecase } from "../../../application/useCases/user/GoogleAuthUseCase";
+
 
 
 
@@ -29,7 +30,7 @@ export class AuthController {
   //  Register a new user and send OTP to their email
   // -----------------------------------------------------------
 
-  async registerUser(req: Request, res: Response): Promise<void> {
+  async registerUser(req: Request, res: Response,next:NextFunction): Promise<void> {
     try {
 
       const dto = new UserRegisterDTO(req.body);
@@ -40,10 +41,7 @@ export class AuthController {
         message: result.message || "User registered successfully! OTP sent to email.",
       });
     } catch (error: any) {
-      res.status(HttpStatusCode.BAD_REQUEST).json({
-        success: false,
-        message: error.message || "User registration failed. Please try again.",
-      });
+    next(error)
     }
   }
 
@@ -51,7 +49,7 @@ export class AuthController {
   // Verify OTP for user registration
   // ------------------------------------------------------------
 
-  async verifyOtp(req: Request, res: Response): Promise<void> {
+  async verifyOtp(req: Request, res: Response,next:NextFunction): Promise<void> {
     try {
       const { email, otp } = req.body;
   console.log('this is from controlre')
@@ -63,10 +61,7 @@ export class AuthController {
         user: result,
       });
     } catch (err: any) {
-      res.status(HttpStatusCode.BAD_REQUEST).json({
-        success: false,
-        message: err.message || "Invalid OTP. Please try again.",
-      });
+     next(err)
     }
   }
 
@@ -74,7 +69,7 @@ export class AuthController {
   //  Resend OTP to user email
   // ------------------------------------------------------------
 
-  async resendOtp(req: Request, res: Response): Promise<void> {
+  async resendOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { email } = req.body;
      
@@ -85,10 +80,7 @@ export class AuthController {
         message: message || "OTP resent successfully!",
       });
     } catch (err: any) {
-      res.status(HttpStatusCode.BAD_REQUEST).json({
-        success: false,
-        message: err.message || "Failed to resend OTP. Please try again.",
-      });
+      next(err)
     }
   }
 
@@ -96,7 +88,7 @@ export class AuthController {
   //  Request to reset password (sends OTP to user email)
   // ------------------------------------------------------------
 
-  async requestForgetPassword(req: Request, res: Response): Promise<void> {
+  async requestForgetPassword(req: Request, res: Response,next:NextFunction): Promise<void> {
     try {
       const dto = new ForgetPasswordRequestDTO(req.body);
       const message = await this._requestForgetPasswordUseCase.execute(dto);
@@ -106,10 +98,7 @@ export class AuthController {
         message: message || "Password reset OTP sent successfully.",
       });
     } catch (err: any) {
-      res.status(HttpStatusCode.BAD_REQUEST).json({
-        success: false,
-        message: err.message || "Failed to send reset OTP. Please try again.",
-      });
+     next(err)
     }
   }
 
@@ -117,7 +106,7 @@ export class AuthController {
   //  Verify reset password OTP and update new password
   // ------------------------------------------------------------
 
-  async verifyResetPassword(req: Request, res: Response): Promise<void> {
+  async verifyResetPassword(req: Request, res: Response,next:NextFunction): Promise<void> {
     try {
       const message = await this._verifyResetPasswordUseCase.execute(req.body);
 
@@ -126,17 +115,14 @@ export class AuthController {
         message: message || "Password reset successful!",
       });
     } catch (err: any) {
-      res.status(HttpStatusCode.BAD_REQUEST).json({
-        success: false,
-        message: err.message || "Password reset failed. Invalid or expired OTP.",
-      });
+     next(err)
     }
   }
 
   // ------------------------------------------------------------
   //  Login user and issue authentication tokens (access + refresh)
   // ------------------------------------------------------------
-  async loginUser(req: Request, res: Response): Promise<void> {
+  async loginUser(req: Request, res: Response,next:NextFunction): Promise<void> {
     try {
       const dto = new LoginUserDTO(req.body);
       const { token, refreshToken, user } = await this._loginUserUsecase.execute(dto);
@@ -188,10 +174,7 @@ export class AuthController {
       });
     } catch (err: any) {
 
-      res.status(HttpStatusCode.UNAUTHORIZED).json({
-        success: false,
-        message: err.message || "Invalid credentials. Please check your email or password.",
-      });
+     next(err)
     }
   }
 
@@ -200,7 +183,7 @@ export class AuthController {
   // Logout user and clear authentication cookies
   // ------------------------------------------------------------
 
-  async logoutUser(_req: Request, res: Response): Promise<void> {
+  async logoutUser(_req: Request, res: Response,next:NextFunction): Promise<void> {
     try {
 
       res.clearCookie("userAccessToken", {
@@ -225,16 +208,13 @@ export class AuthController {
     } catch (error: any) {
 
 
-      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to log out. Please try again later.",
-      });
+   next(error)
     }
   }
   // ------------------------------------------------------------
   //  Google Authentication
   // ------------------------------------------------------------
-  async googleAuth(req: Request, res: Response): Promise<void> {
+  async googleAuth(req: Request, res: Response,next:NextFunction): Promise<void> {
     try {
       const { token, role } = req.body;
       const result = await this._googleAuthUseCase.execute(token, role);
@@ -291,10 +271,7 @@ export class AuthController {
       });
 
     } catch (error: any) {
-      res.status(HttpStatusCode.BAD_REQUEST).json({
-        success: false,
-        message: error.message || "Google authentication failed.",
-      });
+    next(error)
     }
   }
 }

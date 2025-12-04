@@ -5,7 +5,8 @@ export class ResponseGetProfileDTO{
         public email:string,
         public phone:string,
         public profileImage:string,
-        public Address:object
+        public Address:object,
+        public isPassword:boolean
         
     ){}
 }

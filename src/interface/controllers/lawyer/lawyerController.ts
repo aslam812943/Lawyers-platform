@@ -1,5 +1,5 @@
 
-import { Request, Response } from "express";
+import { Request, Response ,NextFunction} from "express";
 import { RegisterLawyerUseCase } from "../../../application/useCases/lawyer/VerificationLawyerUseCase";
 import { LawyerRepository } from "../../../infrastructure/repositories/lawyer/LawyerRepository";
 import { VerificationLawyerDTO } from "../../../application/dtos/lawyer/VerificationLawyerDTO";
@@ -23,7 +23,7 @@ export class LawyerController {
 
 
   
-  async registerLawyer(req: Request, res: Response) {
+  async registerLawyer(req: Request, res: Response,next:NextFunction) {
   
     try {
      
@@ -56,11 +56,7 @@ export class LawyerController {
     } catch (err: any) {
      
 
-
-      res.status(HttpStatusCode.BAD_REQUEST).json({
-        success: false,
-        message: err.message || "Failed to submit lawyer verification details. Please try again.",
-      });
+next(err)
     }
   }
 }

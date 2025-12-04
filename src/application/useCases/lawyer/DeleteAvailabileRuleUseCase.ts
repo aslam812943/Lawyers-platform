@@ -1,15 +1,34 @@
 import { IDeleteAvailableRuleUseCase } from "../interface/lawyer/ICreateAvailabilityRuleUseCase";
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/lawyer/IAvailabilityRuleRepository";
+import { AppError } from "../../../infrastructure/errors/AppError";
+import { HttpStatusCode } from "../../../infrastructure/interface/enums/HttpStatusCode";
 
+export class DeleteAvailableRuleUseCase implements IDeleteAvailableRuleUseCase {
 
-
-export class DeleteAvailableRuleUseCase implements IDeleteAvailableRuleUseCase{
-    constructor(private readonly _ruleRepo:IAvailabilityRuleRepository){}
+    constructor(private readonly _ruleRepo: IAvailabilityRuleRepository) {}
 
     async execute(ruleId: string): Promise<void> {
-        await this._ruleRepo.deleteRuleById(ruleId)
-        await this ._ruleRepo.deleteSlotsByRuleId(ruleId)
-        return 
+
+        try {
+
+        
+            await Promise.all([
+                this._ruleRepo.deleteRuleById(ruleId),
+                this._ruleRepo.deleteSlotsByRuleId(ruleId)
+            ]);
+
+            return;
+
+        } catch (err: any) {
+
+         
+            if (err instanceof AppError) throw err;
+
+         
+            throw new AppError(
+                err.message || "Failed to delete availability rule.",
+                HttpStatusCode.INTERNAL_SERVER_ERROR
+            );
+        }
     }
-    
 }

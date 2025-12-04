@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 import { ITokenService } from '../../interface/services/TokenServiceInterface'
-import { AdminLoginRequestDTO } from '../../dtos/admin/AdminLoginRequestDTO'
+import  AdminLoginRequestDTO  from '../../dtos/admin/AdminLoginRequestDTO'
 import { IAdminRepository } from '../../../domain/repositories/admin/IAdminRepository'
 import { ILoginAdminUseCase } from '../interface/admin/ILoginAdminUseCase'
 import AdminLoginResponseDTO from '../../dtos/admin/AdminLoginResponseDTO'
@@ -24,8 +24,8 @@ export class LoginAdminUseCase implements ILoginAdminUseCase {
 
     if (!ispasswordValid) throw new Error('Invalid credentials')
 
-    const token = this._tokenService.generateAccessToken({ id: admin.id, email: admin.email, role: 'admin' })
-    const refreshToken = this._tokenService.generateRefreshToken(admin.id!, 'admin')
+    const token = this._tokenService.generateAccessToken( admin.id!, 'admin' ,false)
+    const refreshToken = this._tokenService.generateRefreshToken(admin.id!, 'admin',false)
     return AdminMapper.toLoginResponse(admin, token, refreshToken)
   }
 

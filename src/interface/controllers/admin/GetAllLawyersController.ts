@@ -22,6 +22,7 @@ export class GetAllLawyersController {
         page,
         limit,
         search,
+        fromAdmin:true
       });
 
      

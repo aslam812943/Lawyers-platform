@@ -6,6 +6,7 @@ import userRoutes from './src/interface/routes/user/  userRoutes'
 import { DbConnection } from './src/config/mongoose/DbConnection'
 import lawyerRoutes from './src/interface/routes/lawyer/lawyerRoutes'
  import  adminRouts from './src/interface/routes/admin/adminRoutes'
+ import {errorHandler} from './src/interface/middlewares/errorHandler'
 dotenv.config();
 
 const app = express();
@@ -20,11 +21,12 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]      
 }));
 
+
 app.use("/api/user", userRoutes);
 app.use('/api/lawyer',lawyerRoutes)
  app.use('/api/admin',adminRouts)
 
-
+app.use(errorHandler)
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

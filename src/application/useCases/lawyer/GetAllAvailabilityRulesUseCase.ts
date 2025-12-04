@@ -10,6 +10,7 @@ export class GetAllAvailableRuleUseCase implements IGetAllAvailableRuleUseCase{
 
     async execute(id: string): Promise<AvailabilityRule[]> {
         const rules = await this._repo.getAllRules(id)
+        
         return AvailabilityRuleMapper.toDTOList(rules)
     }
 }

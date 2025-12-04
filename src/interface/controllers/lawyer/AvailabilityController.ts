@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response,NextFunction } from "express";
 import { ICreateAvailabilityRuleUseCase } from "../../../application/useCases/interface/lawyer/ICreateAvailabilityRuleUseCase";
 import { IUpdateAvailabilityRuleUseCase } from "../../../application/useCases/interface/lawyer/ICreateAvailabilityRuleUseCase";
 import { IGetAllAvailableRuleUseCase } from "../../../application/useCases/interface/lawyer/ICreateAvailabilityRuleUseCase";
@@ -7,6 +7,7 @@ import { IDeleteAvailableRuleUseCase } from "../../../application/useCases/inter
 import { CreateAvailabilityRuleDTO } from "../../../application/dtos/lawyer/CreateAvailabilityRuleDTO";
 import { UpdateAvailabilityRuleDTO } from "../../../application/dtos/lawyer/UpdateAvailabilityRuleDTO";
 import { HttpStatusCode } from "../../../infrastructure/interface/enums/HttpStatusCode";
+import { error } from "console";
 
 export class AvailabilityController {
   constructor(
@@ -19,9 +20,10 @@ export class AvailabilityController {
   /**
    * Create a new availability rule
    */
-  async createRule(req: Request, res: Response) {
+  async createRule(req: Request, res: Response,next:NextFunction) {
     try {
       const data = req.body.ruleData;
+      
       const lawyerId = req.user?.id
 
       if (!lawyerId) {
@@ -43,7 +45,8 @@ export class AvailabilityController {
         data.maxBookings,
         data.sessionType,
         data.exceptionDays,
-        lawyerId
+        lawyerId,
+        data.consultationFee
       );
 
       const result = await this._createRuleUseCase.execute(dto);
@@ -55,17 +58,14 @@ export class AvailabilityController {
       });
     } catch (err: any) {
      
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: err.message || "Unexpected error while creating rule.",
-      });
+     next(err)
     }
   }
 
   /**
    * Update an existing availability rule
    */
-  async updateRule(req: Request, res: Response) {
+  async updateRule(req: Request, res: Response,next:NextFunction) {
    
     try {
       const ruleId = req.params.ruleId;
@@ -99,20 +99,18 @@ export class AvailabilityController {
         data: result,
       });
     } catch (err: any) {
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: err.message || "Unexpected error while updating rule.",
-      });
+    next(err)
     }
   }
 
   /**
    * Fetch all availability rules for a lawyer
    */
-  async getAllRuls(req: Request, res: Response) {
+  async getAllRuls(req: Request, res: Response,next:NextFunction) {
+    
     try {
       const lawyerId =  req.user?.id 
-
+ 
       if (!lawyerId) {
         return res.status(HttpStatusCode.BAD_REQUEST).json({
           success: false,
@@ -121,6 +119,7 @@ export class AvailabilityController {
       }
 
       const rules = await this._getavailableUsecase.execute(lawyerId);
+    
 
       return res.status(HttpStatusCode.OK).json({
         success: true,
@@ -128,17 +127,14 @@ export class AvailabilityController {
         data: rules,
       });
     } catch (err: any) {
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: err.message || "Failed to fetch availability rules.",
-      });
+     next(err)
     }
   }
 
   /**
    * Delete a rule and its slots
    */
-  async DeleteRule(req: Request, res: Response) {
+  async DeleteRule(req: Request, res: Response,next:NextFunction) {
     try {
       const ruleId = req.params.ruleId;
 
@@ -156,10 +152,7 @@ export class AvailabilityController {
         message: "Rule and its slots deleted successfully.",
       });
     } catch (err: any) {
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: err.message || "Failed to delete rule.",
-      });
+   next(err)
     }
   }
 }

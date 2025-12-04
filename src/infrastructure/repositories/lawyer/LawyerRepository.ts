@@ -57,6 +57,7 @@ export class LawyerRepository implements ILawyerRepository {
   search?: string;
   sort?: string;
   filter?: string;
+   fromAdmin?: boolean;
 }): Promise<{ lawyers: Lawyer[]; total: number }> {
   try {
     const page = query?.page ?? 1;
@@ -76,6 +77,13 @@ export class LawyerRepository implements ILawyerRepository {
         ],
       }),
     };
+
+
+    if (!query?.fromAdmin) {
+  match["user.isBlock"] = false;
+  match['isAdminVerified'] = true
+  match['verificationStatus'] = 'Approved'
+}
 
     // FILTER FEATURE
   if (filter) {
@@ -270,6 +278,7 @@ export class LawyerRepository implements ILawyerRepository {
 
         profileImage: doc.Profileimageurl || "",
         bio: doc.bio || "",
+        isPassword:(doc.userId as any).password?true:false
       };
 
     } catch (error: any) {
@@ -358,6 +367,78 @@ export class LawyerRepository implements ILawyerRepository {
       throw new Error('changePassword failed: ' + (error.message || error));
     }
   }
+
+
+
+  async getSingleLawyer(id: string): Promise<Lawyer> {
+
+    try {
+      if (!id) {
+        throw new Error("Invalid ID: ID not provided");
+      }
+
+      const doc = await LawyerModel.findOne({userId:id})
+        .populate({
+          path: "userId",
+          select: "name email phone role isBlock",
+        })
+        .exec();
+      if (!doc) {
+        throw new Error(`Lawyer with ID ${id} not found`);
+      }
+
+
+
+      return {
+        id: (doc._id as Types.ObjectId).toString(),
+        userId: (doc.userId as any)._id.toString(),
+        barNumber: doc.barNumber,
+        barAdmissionDate: doc.barAdmissionDate,
+        yearsOfPractice: doc.yearsOfPractice,
+        practiceAreas: doc.practiceAreas,
+        languages: doc.languages,
+        documentUrls: doc.documentUrls,
+
+        addresses: doc.Address || {
+          address: "",
+          city: "",
+          state: "",
+          pincode: 0,
+        },
+
+        verificationStatus: doc.verificationStatus,
+        isVerified: doc.isAdminVerified,
+
+        user: {
+          name: (doc.userId as any).name,
+          email: (doc.userId as any).email,
+          phone: (doc.userId as any).phone,
+          isBlock: (doc.userId as any).isBlock,
+        },
+
+        profileImage: doc.Profileimageurl || "",
+        bio: doc.bio || "",
+      };
+
+    } catch (error: any) {
+
+
+      throw new Error(
+        error.message || "Database error while fetching lawyer profile."
+      );
+    }
+  }
+
+
+async findOne(userId: string): Promise<string | null> {
+  try {
+    const lawyer = await LawyerModel.findOne({ userId });
+    return lawyer?._id?.toString() || null;
+  } catch (error) {
+    console.error("Error fetching lawyer:", error);
+    return null;
+  }
+}
 
 
 

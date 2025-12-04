@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction} from "express";
 import { HttpStatusCode } from "../../../infrastructure/interface/enums/HttpStatusCode";
-import { success } from "zod";
+
 
 
 export class LawyerLogoutController {
-    async handle(_req: Request, res: Response): Promise<void> {
+    async handle(_req: Request, res: Response,next:NextFunction): Promise<void> {
         try {
 
 
@@ -29,7 +29,6 @@ export class LawyerLogoutController {
             });
 
         } catch (error) {
-            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to log out. Please try again later." })
-        }
+next(error)        }
     }
 }

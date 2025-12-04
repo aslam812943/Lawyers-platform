@@ -48,13 +48,15 @@ export class LoginUserUsecase {
       }
 
 
-      const accessToken = this._tokenService.generateAccessToken({
-        id: user.id,
-        role: user.role,
-      });
+      const accessToken = this._tokenService.generateAccessToken(
+         user.id!,
+        user.role,
+        user.isBlock
+      );
       const refreshToken = this._tokenService.generateRefreshToken(
         user.id!,
-        user.role!
+        user.role!,
+        user.isBlock!
       );
 
 
