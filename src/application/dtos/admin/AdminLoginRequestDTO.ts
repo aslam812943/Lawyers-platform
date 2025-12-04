@@ -1,4 +1,4 @@
-export class AdminLoginRequestDTO {
+export default class AdminLoginRequestDTO {
   email: string;
   password: string;
 

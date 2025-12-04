@@ -4,6 +4,7 @@ import { IAvailabilityRuleRepository } from "../../../domain/repositories/lawyer
 import AvailabilityRuleModel from "../../db/models/AvailabilityRuleModel";
 import SlotModel from "../../db/models/SlotModel";
 import { AvailabilityRule } from "../../../domain/entities/AvailabilityRule";
+import { Slot } from "../../../domain/entities/Slot";
 import mongoose from "mongoose";
 
 export class AvailabilityRuleRepository implements IAvailabilityRuleRepository {
@@ -22,9 +23,10 @@ export class AvailabilityRuleRepository implements IAvailabilityRuleRepository {
   /**
    * Create all slots generated for the rule
    */
-  async createSlots(ruleId: string, slots: any[]): Promise<any> {
+  async createSlots(ruleId: string,lawyerId:string, slots: any[]): Promise<any> {
     try {
-      const formatted = slots.map(s => ({ ...s, ruleId }));
+      const formatted = slots.map(s => ({ ...s, ruleId,userId :lawyerId}));
+    
       return await SlotModel.insertMany(formatted);
     } catch (err: any) {
       throw new Error("Failed to create slots: " + err.message);
@@ -100,6 +102,7 @@ export class AvailabilityRuleRepository implements IAvailabilityRuleRepository {
           doc.sessionType,
           doc.exceptionDays,
           doc.lawyerId.toString(),
+          doc.consultationFee
         )
       );
     } catch (err: any) {
@@ -121,4 +124,35 @@ export class AvailabilityRuleRepository implements IAvailabilityRuleRepository {
       throw new Error("Failed to delete rule: " + err.message);
     }
   }
+
+
+  async getAllSlots(lawyerId: string): Promise<Slot[]> {
+  try {
+    const response = await SlotModel.find({ userId: lawyerId });
+
+  
+    const slots = response.map((slot: any) => 
+      new Slot(
+        slot._id.toString(),
+         slot.ruleId,
+        slot.userId,
+        slot.startTime,
+        slot.endTime,
+        slot.date,
+        slot.sessionType,
+       
+        slot.isBooked,
+        slot.bookingId ?? null,
+        slot.maxBookings,
+        slot.consultationFee
+      )
+    );
+
+    return slots;
+  } catch (error) {
+    console.error("Error fetching slots:", error);
+    return [];
+  }
+}
+
 }

@@ -23,7 +23,7 @@ export class UpdateAvailabilityRuleUseCase implements IUpdateAvailabilityRuleUse
       if (!newSlots) throw new Error("Failed to generate slots");
 
     
-      await this._repo.createSlots(ruleId, newSlots);
+      await this._repo.createSlots(ruleId,'', newSlots);
 
       return {
         rule: updateRule,

@@ -13,7 +13,7 @@ export interface User {
   profileImage?:string
   address?: object;
   googleId?:string
-
+isPassword?:boolean
 
 }
 

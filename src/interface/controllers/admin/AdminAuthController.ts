@@ -1,7 +1,7 @@
 
 import { Request, Response } from 'express';
 import { LoginAdminUseCase } from '../../../application/useCases/Admin/LoginAdminUseCase';
-import { AdminLoginRequestDTO } from '../../../application/dtos/admin/AdminLoginRequestDTO';
+import  AdminLoginRequestDTO  from '../../../application/dtos/admin/AdminLoginRequestDTO';
 import { HttpStatusCode } from '../../../infrastructure/interface/enums/HttpStatusCode';
 
 

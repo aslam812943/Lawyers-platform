@@ -12,12 +12,13 @@ import { GetProfileController } from "../../controllers/lawyer/ProfileController
 // Cloudinary Upload Service
 
 import { upload } from "../../../infrastructure/services/cloudinary/CloudinaryConfig";
-import { verifyToken } from "../../middlewares/verifyToken";
+import { AuthMiddleware } from "../../middlewares/AuthMiddleware";
 // Repository
 
 import { AvailabilityRuleRepository } from "../../../infrastructure/repositories/lawyer/AvailabilityRuleRepository";
 import { LawyerRepository } from "../../../infrastructure/repositories/lawyer/LawyerRepository";
-
+import { UserRepository } from "../../../infrastructure/repositories/user/UserRepository";
+import { TokenService } from "../../../infrastructure/services/jwt/TokenService";
 
 
 
@@ -30,7 +31,7 @@ import { DeleteAvailableRuleUseCase } from "../../../application/useCases/lawyer
 import { GetProfileUseCase } from "../../../application/useCases/lawyer/GetProfileUseCase";
 import { UpdateProfileUseCase } from "../../../application/useCases/lawyer/UpdateProfileUseCase";
 import { ChangePasswordUseCase } from "../../../application/useCases/lawyer/ChangePasswordUseCase";
-
+import { CheckUserStatusUseCase } from "../../../application/useCases/user/checkUserStatusUseCase";
 const router = Router();
 
 // ============================================================================
@@ -44,6 +45,9 @@ const lawyerLogoutController = new LawyerLogoutController();
 // Repository instance
 const availabilityRuleRepository = new AvailabilityRuleRepository();
 const lawyerRepository = new LawyerRepository()
+const userRepository = new UserRepository();
+
+
 
 // UseCase instances
 const createAvailabilityRuleUseCase = new CreateAvailabilityRuleUseCase(availabilityRuleRepository);
@@ -53,6 +57,10 @@ const deleteAvailableRuleUseCase = new DeleteAvailableRuleUseCase(availabilityRu
 const getProfileUseCase = new GetProfileUseCase(lawyerRepository)
 const updateProfileUseCase = new UpdateProfileUseCase(lawyerRepository)
 const changePasswordUseCase = new ChangePasswordUseCase(lawyerRepository)
+const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepository);
+const tokenService = new TokenService();
+const authMiddleware = new AuthMiddleware(["lawyer"], checkUserStatusUseCase, tokenService);
+
 // Availability Controller 
 const availabilityController = new AvailabilityController(
   createAvailabilityRuleUseCase,
@@ -69,44 +77,44 @@ const getProfileController = new GetProfileController(getProfileUseCase, updateP
 
 router.post(
   "/verifyDetils",
-  upload.array("documents"),
-  (req, res) => lawyerController.registerLawyer(req, res)
+  upload.array("documents"), authMiddleware.execute,
+  (req, res,next) => lawyerController.registerLawyer(req, res,next)
 );
 
 
-router.post("/logout", (req, res) =>
-  lawyerLogoutController.handle(req, res)
+router.post("/logout", (req, res,next) =>
+  lawyerLogoutController.handle(req, res,next)
 );
 
 
 
 //  Schedule Management Routes
 
-router.post("/schedule/create", verifyToken(['lawyer']), (req, res) =>
-  availabilityController.createRule(req, res)
+router.post("/schedule/create", authMiddleware.execute, (req, res,next) =>
+  availabilityController.createRule(req, res,next)
 );
 
 
-router.put("/schedule/update/:ruleId", verifyToken(['lawyer']), (req, res) =>
-  availabilityController.updateRule(req, res)
+router.put("/schedule/update/:ruleId", authMiddleware.execute, (req, res,next) =>
+  availabilityController.updateRule(req, res,next)
 );
 
 
-router.get("/schedule/", verifyToken(['lawyer']), (req, res) =>
-  availabilityController.getAllRuls(req, res)
+router.get("/schedule/", authMiddleware.execute, (req, res,next) =>
+  availabilityController.getAllRuls(req, res,next)
 );
 
-router.delete("/schedule/delete/:ruleId", (req, res) =>
-  availabilityController.DeleteRule(req, res)
+router.delete("/schedule/delete/:ruleId", (req, res,next) =>
+  availabilityController.DeleteRule(req, res,next)
 );
 
 
 
-router.get('/profile', verifyToken(['lawyer']), (req, res) => getProfileController.getDetils(req, res))
+router.get('/profile', authMiddleware.execute, (req, res,next) => getProfileController.getDetils(req, res,next))
 
 
-router.put('/profile/update', verifyToken(['lawyer']), upload.single('profileImage'), (req, res) => getProfileController.updateProfile(req, res))
+router.put('/profile/update', authMiddleware.execute, upload.single('profileImage'), (req, res,next) => getProfileController.updateProfile(req, res,next))
 
-router.put('/profile/password', verifyToken(['lawyer']), (req, res) => getProfileController.changePassword(req, res))
+router.put('/profile/password', authMiddleware.execute, (req, res,next) => getProfileController.changePassword(req, res,next))
 
 export default router;

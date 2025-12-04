@@ -5,6 +5,8 @@ import { CreateAvailabilityRuleDTO } from "../../dtos/lawyer/CreateAvailabilityR
 import { AvailabilityRuleMapper } from "../../mapper/lawyer/AvailabilityRuleMapper";
 import { SlotGeneratorService } from "../../../infrastructure/services/SlotGenerator/SlotGeneratorService";
 import { Slot } from "../../../domain/entities/Slot";
+import { AppError } from "../../../infrastructure/errors/AppError";
+import { HttpStatusCode } from "../../../infrastructure/interface/enums/HttpStatusCode";
 
 export class CreateAvailabilityRuleUseCase implements ICreateAvailabilityRuleUseCase {
 
@@ -15,33 +17,27 @@ export class CreateAvailabilityRuleUseCase implements ICreateAvailabilityRuleUse
     return h * 60 + m;
   }
 
-  // -------------------------
-  // VALIDATION
-  // -------------------------
   private async validate(dto: CreateAvailabilityRuleDTO) {
     const errors: string[] = [];
 
     const startMin = this.toMinutes(dto.startTime);
     const endMin = this.toMinutes(dto.endTime);
 
-    // 1) Time validation
+    // ---- VALIDATIONS ----
     if (startMin >= endMin) errors.push("Start time must be before end time.");
     if (Number(dto.slotDuration) < 30 || Number(dto.slotDuration) > 120)
       errors.push("Slot duration must be 30–120 minutes.");
-    if (Number(dto.bufferTime) < 5 || Number(dto.bufferTime )> 60)
+    if (Number(dto.bufferTime) < 5 || Number(dto.bufferTime) > 60)
       errors.push("Buffer time must be 5–60 minutes.");
-    if (Number(dto.slotDuration) +Number( dto.bufferTime) > endMin - startMin)
+    if (Number(dto.slotDuration) + Number(dto.bufferTime) > endMin - startMin)
       errors.push("Slot duration + buffer time exceeds total available time.");
 
-    // 2) Date validation
     if (dto.startDate > dto.endDate)
       errors.push("Start date must be earlier than end date.");
 
-    // 3) Available days
     if (!dto.availableDays || dto.availableDays.length === 0)
       errors.push("At least one available day is required.");
 
-    // 4) Exception days validation
     if (dto.exceptionDays.length > 0) {
       for (const ex of dto.exceptionDays) {
         if (ex < dto.startDate || ex > dto.endDate) {
@@ -49,9 +45,7 @@ export class CreateAvailabilityRuleUseCase implements ICreateAvailabilityRuleUse
         }
       }
     }
-   
 
-    // 5) Overlap validation
     const existingRules = await this._repo.getAllRules(dto.lawyerId);
 
     const newStartDate = new Date(dto.startDate);
@@ -61,13 +55,10 @@ export class CreateAvailabilityRuleUseCase implements ICreateAvailabilityRuleUse
       const ruleStartDate = new Date(rule.startDate);
       const ruleEndDate = new Date(rule.endDate);
 
-      // Date overlap?
-      const dateOverlap =
-        newStartDate <= ruleEndDate && newEndDate >= ruleStartDate;
+      const dateOverlap = newStartDate <= ruleEndDate && newEndDate >= ruleStartDate;
 
       if (!dateOverlap) continue;
 
-      // Day overlap?
       const dayOverlap = dto.availableDays.some((d) =>
         rule.availableDays.includes(d)
       );
@@ -87,41 +78,45 @@ export class CreateAvailabilityRuleUseCase implements ICreateAvailabilityRuleUse
     }
 
     if (errors.length > 0) {
-      throw new Error("Validation failed: " + errors.join("; "));
+      throw new AppError("Validation failed: " + errors.join("; "), HttpStatusCode.BAD_REQUEST);
     }
   }
 
-  // -------------------------
-  // EXECUTE (MAIN METHOD)
-  // -------------------------
   async execute(dto: CreateAvailabilityRuleDTO): Promise<{ rule: AvailabilityRule; slots: Slot[] }> {
+
     try {
       if (!dto.lawyerId) {
-        throw new Error("Lawyer ID is missing.");
+        throw new AppError("Lawyer ID is missing.", HttpStatusCode.BAD_REQUEST);
       }
 
-   
       await this.validate(dto);
 
-     
       const newRuleEntity = AvailabilityRuleMapper.toEntity(dto);
 
-     
       const savedRule = await this._repo.createRule(newRuleEntity);
 
-      if (!savedRule) throw new Error("Failed to save availability rule.");
+      if (!savedRule) {
+        throw new AppError("Failed to save availability rule.", HttpStatusCode.INTERNAL_SERVER_ERROR);
+      }
 
-      
       const slots = SlotGeneratorService.generateSlots(newRuleEntity);
 
-      if (!slots || slots.length === 0)
-        throw new Error("Failed to generate slots.");
+      if (!slots || slots.length === 0) {
+        throw new AppError("Failed to generate slots.", HttpStatusCode.INTERNAL_SERVER_ERROR);
+      }
 
-      await this._repo.createSlots(savedRule._id.toString(), slots);
+      await this._repo.createSlots(savedRule._id.toString(), dto.lawyerId, slots);
 
       return { rule: savedRule, slots };
+
     } catch (err: any) {
-      throw new Error( err.message);
+
+      if (err instanceof AppError) throw err;
+
+      throw new AppError(
+        err.message || "Something went wrong while creating availability rule.",
+        HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }

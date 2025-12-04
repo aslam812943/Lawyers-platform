@@ -26,7 +26,8 @@ export class GetProfileMapper {
       data.user?.email ?? "",
       data.user?.phone ?? 0,
       data.profileImage,
-      data.bio
+      data.bio,
+      data.isPassword
     );
 
     return response;

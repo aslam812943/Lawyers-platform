@@ -34,6 +34,7 @@ export class SlotGeneratorService {
             endTime: nextSlot.toTimeString().slice(0, 5),
             sessionType: rule.sessionType,
             maxBookings: maxBookings,
+             consultationFee: rule.consultationFee
           });
 
           currentStart = new Date(

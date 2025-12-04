@@ -14,6 +14,7 @@ export class GetAvailabilityRuleDTO {
     public sessionType: string,
     public exceptionDays: string[],
     public lawyerId: string,
+    public  consultationFee:string
 
   ){}
 }

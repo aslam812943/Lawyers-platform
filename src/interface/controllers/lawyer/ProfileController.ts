@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response,NextFunction } from "express";
 import { IGetProfileUseCase, IUpdateProfileUseCase, IChangePasswordUseCase } from "../../../application/useCases/interface/lawyer/IProfileUseCases";
 import { UpdateLawyerProfileDTO } from "../../../application/dtos/lawyer/UpdateLawyerProfileDTO";
 import { ChangePasswordDTO } from "../../../application/dtos/lawyer/ChangePasswordDTO";
@@ -14,7 +14,7 @@ export class GetProfileController {
   // ------------------------------------------
   //   GET PROFILE
   // ------------------------------------------
-  async getDetils(req: Request, res: Response) {
+  async getDetils(req: Request, res: Response,next:NextFunction) {
     try {
       const id = req.user?.id;
 
@@ -36,18 +36,14 @@ export class GetProfileController {
     } catch (error: any) {
 
 
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to fetch profile. Please try again.",
-        error: error.message,
-      });
+    next(error)
     }
   }
 
   // ------------------------------------------
   //   UPDATE PROFILE
   // ------------------------------------------
-  async updateProfile(req: Request, res: Response) {
+  async updateProfile(req: Request, res: Response,next:NextFunction) {
     const id = req.user?.id
 
     if (!id) {
@@ -81,18 +77,14 @@ export class GetProfileController {
     } catch (error: any) {
 
 
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to update profile. Please try again.",
-        error: error.message,
-      });
+  next(error)
     }
   }
 
   // ------------------------------------------
   //   CHANGE PASSWORD
   // ------------------------------------------
-  async changePassword(req: Request, res: Response) {
+  async changePassword(req: Request, res: Response,next:NextFunction) {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -112,10 +104,7 @@ export class GetProfileController {
       });
     } catch (error: any) {
 
-      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: error.message || 'Failed to change password',
-      });
+   next(error)
     }
   }
 }

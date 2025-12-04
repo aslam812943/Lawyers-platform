@@ -3,7 +3,7 @@ import { VerificationLawyerDTO } from "../../../application/dtos/lawyer/Verifica
 import { UpdateLawyerProfileDTO } from "../../../application/dtos/lawyer/UpdateLawyerProfileDTO";
 export interface ILawyerRepository {
   createLawyer(lawyer: VerificationLawyerDTO): Promise<Lawyer>;
-  findAll(query?: { page?: number; limit?: number; search?: string }): Promise<{ lawyers: Lawyer[]; total: number }>;
+  findAll(query?: { page?: number; limit?: number; search?: string; fromAdmin?: boolean; }): Promise<{ lawyers: Lawyer[]; total: number }>;
   blockLawyer(id: string): Promise<void>;
   unBlockLawyer(id: string): Promise<void>;
   approveLawyer(id: string): Promise<void>;
@@ -11,6 +11,9 @@ export interface ILawyerRepository {
   findById(id: string): Promise<Lawyer>;
   updateProfile(id: string, dto: UpdateLawyerProfileDTO): Promise<void>
   changePassword(id: string, oldPass: string, newPass: string): Promise<void>
+  getSingleLawyer(id:string):Promise<Lawyer>;
+  findOne(userId:string):Promise<string|null>
+  
  
 }
 

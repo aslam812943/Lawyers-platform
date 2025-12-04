@@ -22,3 +22,4 @@ export interface IGetAllAvailableRuleUseCase{
 export interface IDeleteAvailableRuleUseCase{
     execute(ruleId:string):Promise<void>
 }
+

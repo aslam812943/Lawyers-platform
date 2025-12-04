@@ -2,12 +2,16 @@
 
 export class Slot {
   constructor(
-    public readonly startTime: string,
-    public readonly endTime: string,
-    public readonly date: string,
-    public readonly sessionType: string,
-    public readonly ruleId: string,
-    public isBooked: boolean = false,
-    public bookingId?: string | null
-  ) {}
+    public id: string,
+    public ruleId: string,
+    public userId: string,
+    public startTime: string,
+    public endTime: string,
+    public date: string,
+    public sessionType: string,
+    public isBooked: boolean,
+    public bookingId?: string | null,
+    public maxBookings: Number = 1,
+    public consultationFee?:string
+  ) { }
 }

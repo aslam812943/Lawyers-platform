@@ -1,7 +1,7 @@
 
 import express from "express";
 import { AuthController } from "../../controllers/user/AuthController";
-
+import { GetSingleLawyerController } from "../../controllers/user/GetSingleLawyerController";
 //  Importing all required UseCases for authentication flow
 import { RegisterUserUsecase } from "../../../application/useCases/user/auth/RegisterUserUsecase";
 import { VerifyOtpUseCase } from "../../../application/useCases/user/auth/VerifyOtpUseCase";
@@ -15,10 +15,13 @@ import { ProfileEditUseCase } from "../../../application/useCases/user/ProfileEd
 import { GoogleAuthUsecase } from "../../../application/useCases/user/GoogleAuthUseCase";
 import { GoogleAuthService } from "../../../infrastructure/services/googleAuth/GoogleAuthService";
 import { GetAllLawyersUseCase } from "../../../application/useCases/user/GetAllLawyersUseCase";
+import { GetSingleLawyerUseCase } from "../../../application/useCases/user/GetSingleLawyerUseCase";
+import { GetAllSlotsUseCase } from "../../../application/useCases/user/GetAllSlotsUseCase";
+import { CheckUserStatusUseCase } from "../../../application/useCases/user/checkUserStatusUseCase";
 // Cloudinary Upload Service
 import { upload } from "../../../infrastructure/services/cloudinary/CloudinaryConfig";
 
-import { verifyToken } from "../../middlewares/verifyToken";
+import { AuthMiddleware } from "../../middlewares/AuthMiddleware";
 
 import { GetProfileUseCase } from "../../../application/useCases/user/GetProfileUseCase";
 import { GetProfileController } from "../../controllers/user/GetProfileController";
@@ -26,6 +29,7 @@ import { GetAllLawyersController } from "../../controllers/user/GetAllLawyersCon
 
 //  Importing Repositories and Services 
 import { UserRepository } from "../../../infrastructure/repositories/user/UserRepository";
+import { AvailabilityRuleRepository } from "../../../infrastructure/repositories/lawyer/AvailabilityRuleRepository";
 import { LawyerRepository } from "../../../infrastructure/repositories/lawyer/LawyerRepository";
 import { RedisCacheService } from "../../../infrastructure/services/otp/RedisCacheService";
 import { NodeMailerEmailService } from "../../../infrastructure/services/nodeMailer/NodeMailerEmailService";
@@ -45,6 +49,7 @@ const userRepository = new UserRepository();
 const loginResponseMapper = new LoginResponseMapper();
 const tokenService = new TokenService();
 const lawyerRepository = new LawyerRepository()
+const availabilityRuleRepository = new AvailabilityRuleRepository()
 //  Initialize use case instances 
 const requestForgetPasswordUseCase = new RequestForgetPasswordUseCase(userRepository, otpService, mailService);
 const verifyResetPasswordUseCase = new VerifyResetPasswordUseCase(userRepository, otpService);
@@ -60,6 +65,12 @@ const googleAuthService = new GoogleAuthService();
 const googleAuthUseCase = new GoogleAuthUsecase(userRepository, googleAuthService, tokenService);
 const getAllLawyersusecase = new GetAllLawyersUseCase(lawyerRepository)
 const getAllLawyersController = new GetAllLawyersController(getAllLawyersusecase)
+const getSingleLawyerUseCase = new GetSingleLawyerUseCase(lawyerRepository)
+const getAllSlotsUseCase = new GetAllSlotsUseCase(availabilityRuleRepository)
+const getSingleLawyerController = new GetSingleLawyerController(getSingleLawyerUseCase, getAllSlotsUseCase)
+const checkUserStatusUseCase = new CheckUserStatusUseCase(userRepository);
+const authMiddleware = new AuthMiddleware(["user"], checkUserStatusUseCase, tokenService);
+
 const authController = new AuthController(
   registerUserUsecase,
   verifyOtpUseCase,
@@ -73,48 +84,47 @@ const authController = new AuthController(
 //  Define authentication-related API routes
 
 
-router.post("/register", (req, res) => authController.registerUser(req, res));
+router.post("/register", (req, res,next) => authController.registerUser(req, res,next));
 
 
-router.post("/verify-otp", (req, res) => authController.verifyOtp(req, res));
+router.post("/verify-otp", (req, res,next) => authController.verifyOtp(req, res,next));
 
 
-router.post("/login", (req, res) => authController.loginUser(req, res));
+router.post("/login", (req, res,next) => authController.loginUser(req, res,next));
 
 
-router.post("/google", (req, res) => authController.googleAuth(req, res));
+router.post("/google", (req, res,next) => authController.googleAuth(req, res,next));
 
 
-router.post("/resend-otp", (req, res) => authController.resendOtp(req, res));
+router.post("/resend-otp", (req, res,next) => authController.resendOtp(req, res,next));
 
 
-router.post("/forget-password", (req, res) => authController.requestForgetPassword(req, res));
+router.post("/forget-password", (req, res,next) => authController.requestForgetPassword(req, res,next));
 
 
-router.post("/reset-password", (req, res) => authController.verifyResetPassword(req, res));
+router.post("/reset-password", (req, res,next) => authController.verifyResetPassword(req, res,next));
 
 
-router.post('/logout', (req, res) => authController.logoutUser(req, res))
+router.post('/logout', (req, res,next) => authController.logoutUser(req, res,next))
 
 
-router.get('/profile', verifyToken(['user']), (req, res) => { getProfileController.getprofiledetils(req, res) })
-
-
-
-
-router.put(
-  "/profile/update",
-  verifyToken(['user']),
-  upload.single("profileImage"),
-  (req, res) => getProfileController.editProfile(req, res)
-);
-
-
-router.put('/profile/password', verifyToken(['user']), (req, res) => getProfileController.chengePassword(req, res))
+router.get('/profile', authMiddleware.execute, (req, res,next) => { getProfileController.getprofiledetils(req, res,next) })
 
 
 
 
-router.get('/lawyers',(req,res)=>getAllLawyersController.GetAllLawyers(req,res))
+router.put("/profile/update", authMiddleware.execute, upload.single("profileImage"), (req, res,next) => getProfileController.editProfile(req, res,next));
 
+
+router.put('/profile/password', authMiddleware.execute, (req, res,next) => getProfileController.chengePassword(req, res,next))
+
+
+
+
+router.get('/lawyers', authMiddleware.execute, (req, res,next) => getAllLawyersController.GetAllLawyers(req, res,next))
+
+
+router.get(`/lawyers/:id`, authMiddleware.execute, (req, res,next) => getSingleLawyerController.getlawyer(req, res,next))
+
+router.get(`/lawyers/slots/:id`, authMiddleware.execute, (req, res,next) => getSingleLawyerController.getallslots(req, res,next))
 export default router;

@@ -2,23 +2,27 @@ import { Schema,Document,Types,model } from "mongoose";
 
 export interface ISlotModel extends Document{
     ruleId:Types.ObjectId,
+    userId:Types.ObjectId,
       date: string,
   startTime: string,
   endTime: string,
   sessionType: string,
   maxBookings: number,
-  bookedCount: number
+  isBooked: boolean,
+   consultationFee:string
 }
 
 
 const SlotSchema = new Schema<ISlotModel>({
   ruleId: { type: Schema.Types.ObjectId, ref: "AvailabilityRule" },
+  userId:{type:Schema.Types.ObjectId,ref:'Lawyer'},
   date: String,
   startTime: String,
   endTime: String,
   sessionType: String,
   maxBookings: Number,
-  bookedCount: { type: Number, default: 0 }
+  isBooked: { type: Boolean, default: false },
+   consultationFee:String
 },{timestamps:true})
 
 

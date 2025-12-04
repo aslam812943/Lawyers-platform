@@ -1,6 +1,6 @@
 
 import express from 'express';
-import { verifyToken } from '../../middlewares/verifyToken';
+import { AdminAuthMiddleware } from '../../middlewares/admin/AdminAuthMiddleware';
 import { NodeMailerEmailService } from '../../../infrastructure/services/nodeMailer/NodeMailerEmailService';
 
 //  Admin Authentication
@@ -43,6 +43,7 @@ const router = express.Router();
 const tokenService = new TokenService();
 const adminRepo = new AdminRepository();
 const nodeMailerEmailService = new NodeMailerEmailService()
+const adminAuth = new AdminAuthMiddleware().execute;
 // ------------------------------------------------------
 //  Admin Authentication
 // ------------------------------------------------------
@@ -76,7 +77,7 @@ const rejectLawyerUseCase = new RejectLawyerUseCase(lawyerRepo,nodeMailerEmailSe
 const rejectLawyerController = new RejectLawyerController(rejectLawyerUseCase);
 
 // ------------------------------------------------------
-// 📡 Admin Routes
+//  Admin Routes
 // ------------------------------------------------------
 
 //  Admin Login and Logout
@@ -84,16 +85,16 @@ router.post('/login', (req, res) => controller.login(req, res));
 router.post('/logout',(req,res)=>controller.logout(req,res))
 
 //  User Management Routes
-router.get('/users', verifyToken(["admin"]), (req, res) => getAllUsersController.handle(req, res));
-router.patch('/users/:id/block', verifyToken(["admin"]), (req, res) => blockUserController.handle(req, res));
-router.patch('/users/:id/unblock', verifyToken(["admin"]), (req, res) => unBlockUserController.handle(req, res));
+router.get('/users', adminAuth, (req, res) => getAllUsersController.handle(req, res));
+router.patch('/users/:id/block', adminAuth, (req, res) => blockUserController.handle(req, res));
+router.patch('/users/:id/unblock', adminAuth, (req, res) => unBlockUserController.handle(req, res));
 
 //  Lawyer Management Routes
-router.get('/lawyers', verifyToken(["admin"]), (req, res) => getAllLawyersController.handle(req, res));
-router.patch('/lawyers/:id/block', verifyToken(["admin"]), (req, res) => blockLawyerController.handle(req, res));
-router.patch('/lawyers/:id/unblock', verifyToken(["admin"]), (req, res) => unBlockLawyerController.handle(req, res));
-router.patch('/lawyers/:id/approve', verifyToken(["admin"]), (req, res) => approveLawyerController.handle(req, res));
-router.patch('/lawyers/:id/reject', verifyToken(["admin"]), (req, res) => rejectLawyerController.handle(req, res));
+router.get('/lawyers',adminAuth, (req, res) => getAllLawyersController.handle(req, res));
+router.patch('/lawyers/:id/block', adminAuth, (req, res) => blockLawyerController.handle(req, res));
+router.patch('/lawyers/:id/unblock', adminAuth, (req, res) => unBlockLawyerController.handle(req, res));
+router.patch('/lawyers/:id/approve',adminAuth, (req, res) => approveLawyerController.handle(req, res));
+router.patch('/lawyers/:id/reject', adminAuth, (req, res) => rejectLawyerController.handle(req, res));
 
 
 export default router;
