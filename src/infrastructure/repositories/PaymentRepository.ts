@@ -1,6 +1,6 @@
 import { IPaymentRepository } from "../../domain/repositories/IPaymentRepository";
 import { Payment } from "../../domain/entities/Payment";
-import { PaymentModel, IPaymentDocument } from "../db/models/PaymentModel";
+import { PaymentModel, IPaymentDocument } from "../db/models/admin/PaymentModel";
 
 export class PaymentRepository implements IPaymentRepository {
     async create(payment: Payment): Promise<Payment> {

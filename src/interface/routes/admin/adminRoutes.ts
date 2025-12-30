@@ -34,7 +34,10 @@ import { RejectLawyerController } from '../../controllers/admin/RejectLawyerCont
 
 
 
-
+// Subscription Management
+import { SubscriptionRepository } from '../../../infrastructure/repositories/admin/SubscriptionRepository';
+import { CreateSubscriptionUseCase } from '../../../application/useCases/Admin/CreateSubscriptionUseCase';
+import { CreateSubscriptionController } from '../../controllers/admin/CreateSubscriptionController';
 const router = express.Router();
 
 // ------------------------------------------------------
@@ -76,11 +79,26 @@ const approveLawyerController = new ApproveLawyerController(approveLawyerUseCase
 const rejectLawyerUseCase = new RejectLawyerUseCase(lawyerRepo, nodeMailerEmailService);
 const rejectLawyerController = new RejectLawyerController(rejectLawyerUseCase);
 
+
+
+
+
+
+
+
+// ------------------------------------------------------
+// Subscription Management Setup
+// ------------------------------------------------------
+const subscriptionRepo = new SubscriptionRepository();
+const createSubscriptionUseCase = new CreateSubscriptionUseCase(subscriptionRepo);
+const createSubscriptionController = new CreateSubscriptionController(createSubscriptionUseCase);
+
+
 // ------------------------------------------------------
 //  Admin Routes
 // ------------------------------------------------------
 
-//  Admin Login and Logout
+
 //  Admin Login and Logout
 router.post('/login', (req, res, next) => controller.login(req, res, next));
 router.post('/logout', (req, res, next) => controller.logout(req, res, next))
@@ -98,4 +116,9 @@ router.patch('/lawyers/:id/approve', adminAuth, (req, res, next) => approveLawye
 router.patch('/lawyers/:id/reject', adminAuth, (req, res, next) => rejectLawyerController.handle(req, res, next));
 
 
-export default router;
+
+// Subscription Managment Routes
+router.post('/subscription/create', adminAuth, (req, res, next) => createSubscriptionController.create(req, res, next));
+
+
+export default router
