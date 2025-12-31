@@ -9,7 +9,8 @@ export class SubscriptionMapper {
             subscription.duration,
             subscription.durationUnit,
             subscription.price,
-            subscription.commissionPercent
+            subscription.commissionPercent,
+            subscription.isActive
         );
     }
 

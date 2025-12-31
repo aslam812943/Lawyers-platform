@@ -37,7 +37,9 @@ import { RejectLawyerController } from '../../controllers/admin/RejectLawyerCont
 // Subscription Management
 import { SubscriptionRepository } from '../../../infrastructure/repositories/admin/SubscriptionRepository';
 import { CreateSubscriptionUseCase } from '../../../application/useCases/Admin/CreateSubscriptionUseCase';
-import { CreateSubscriptionController } from '../../controllers/admin/CreateSubscriptionController';
+import { GetSubscriptionsUseCase } from '../../../application/useCases/Admin/GetSubscriptionsUseCase';
+import { ToggleSubscriptionStatusUseCase } from '../../../application/useCases/Admin/ToggleSubscriptionStatusUseCase';
+import { AdminSubscriptionController } from '../../controllers/admin/AdminSubscriptionController';
 const router = express.Router();
 
 // ------------------------------------------------------
@@ -89,9 +91,13 @@ const rejectLawyerController = new RejectLawyerController(rejectLawyerUseCase);
 // ------------------------------------------------------
 // Subscription Management Setup
 // ------------------------------------------------------
+// Subscription Management Setup
+// ------------------------------------------------------
 const subscriptionRepo = new SubscriptionRepository();
 const createSubscriptionUseCase = new CreateSubscriptionUseCase(subscriptionRepo);
-const createSubscriptionController = new CreateSubscriptionController(createSubscriptionUseCase);
+const getSubscriptionsUseCase = new GetSubscriptionsUseCase(subscriptionRepo);
+const toggleSubscriptionStatusUseCase = new ToggleSubscriptionStatusUseCase(subscriptionRepo);
+const adminSubscriptionController = new AdminSubscriptionController(createSubscriptionUseCase, getSubscriptionsUseCase, toggleSubscriptionStatusUseCase);
 
 
 // ------------------------------------------------------
@@ -118,7 +124,9 @@ router.patch('/lawyers/:id/reject', adminAuth, (req, res, next) => rejectLawyerC
 
 
 // Subscription Managment Routes
-router.post('/subscription/create', adminAuth, (req, res, next) => createSubscriptionController.create(req, res, next));
+router.get('/subscription', adminAuth, (req, res, next) => adminSubscriptionController.getAll(req, res, next));
+router.post('/subscription/create', adminAuth, (req, res, next) => adminSubscriptionController.create(req, res, next));
+router.patch('/subscription/:id/status', adminAuth, (req, res, next) => adminSubscriptionController.toggleStatus(req, res, next));
 
 
 // ------------------------------------------------------

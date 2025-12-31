@@ -5,6 +5,7 @@ export class SubscriptionDTO {
         public duration: number,
         public durationUnit: string,
         public price: number,
-        public commissionPercent: number
+        public commissionPercent: number,
+        public isActive: boolean
     ) { }
 }
