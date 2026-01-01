@@ -25,7 +25,7 @@ import { GetMessagesUseCase } from "../../../application/useCases/chat/GetMessag
 
 // Review Use Cases
 import { AddReviewUseCase } from "../../../application/useCases/user/review/AddReviewUseCase";
-import { GetAllReviewsUseCase } from "../../../application/useCases/user/review/GetAllReviewsUseCase";
+import { GetAllReviewsUseCase } from "../../../application/useCases/lawyer/review/GetAllReviewsUseCase";
 
 // Cloudinary Upload Service
 import { upload } from "../../../infrastructure/services/cloudinary/CloudinaryConfig";
