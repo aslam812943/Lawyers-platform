@@ -23,6 +23,9 @@ import { CheckChatAccessUseCase } from "../../../application/useCases/chat/Check
 import { GetChatRoomUseCase } from "../../../application/useCases/chat/GetChatRoomUseCase";
 import { GetMessagesUseCase } from "../../../application/useCases/chat/GetMessagesUseCase";
 
+// Review Use Cases
+import { AddReviewUseCase } from "../../../application/useCases/user/review/AddReviewUseCase";
+
 // Cloudinary Upload Service
 import { upload } from "../../../infrastructure/services/cloudinary/CloudinaryConfig";
 
@@ -40,6 +43,8 @@ import { LawyerRepository } from "../../../infrastructure/repositories/lawyer/La
 import { BookingRepository } from "../../../infrastructure/repositories/user/BookingRepository";
 import { ChatRoomRepository } from "../../../infrastructure/repositories/ChatRoomRepository";
 import { MessageRepository } from "../../../infrastructure/repositories/messageRepository";
+import { ReviewRepository } from "../../../infrastructure/repositories/ReviewRepository";
+import { ReviewController } from "../../controllers/user/ReviewController";
 
 import { RedisCacheService } from "../../../infrastructure/services/otp/RedisCacheService";
 import { NodeMailerEmailService } from "../../../infrastructure/services/nodeMailer/NodeMailerEmailService";
@@ -89,8 +94,14 @@ const authMiddleware = new UserAuthMiddleware(checkUserStatusUseCase, tokenServi
 // Chat
 const checkChatAccessUseCase = new CheckChatAccessUseCase(bookingRepository);
 const getChatRoomUseCase = new GetChatRoomUseCase(chatRoomRepository, bookingRepository);
+
 const getMessagesUseCase = new GetMessagesUseCase(messageRepository);
 const chatController = new ChatController(checkChatAccessUseCase, getChatRoomUseCase, getMessagesUseCase);
+
+// Review
+const reviewRepository = new ReviewRepository();
+const addReviewUseCase = new AddReviewUseCase(reviewRepository);
+const reviewController = new ReviewController(addReviewUseCase);
 
 const authController = new AuthController(
   registerUserUsecase,
@@ -155,5 +166,8 @@ router.get("/chat/rooms", authMiddleware.execute, (req, res, next) => chatContro
 router.get("/chat/room/:roomId", authMiddleware.execute, (req, res, next) => chatController.getRoomById(req, res, next));
 router.post("/chat/room", authMiddleware.execute, (req, res, next) => chatController.getChatRoom(req, res, next));
 router.post("/chat/upload", authMiddleware.execute, upload.single("file"), (req, res, next) => chatController.uploadFile(req, res, next));
+
+// Review Routes
+router.post("/review", authMiddleware.execute, (req, res, next) => reviewController.addReview(req, res, next));
 
 export default router;
