@@ -2,7 +2,7 @@
 import express from "express";
 import { AuthController } from "../../controllers/user/AuthController";
 import { GetSingleLawyerController } from "../../controllers/user/GetSingleLawyerController";
-//  Importing all required UseCases for authentication flow
+
 import { RegisterUserUsecase } from "../../../application/useCases/user/auth/RegisterUserUsecase";
 import { VerifyOtpUseCase } from "../../../application/useCases/user/auth/VerifyOtpUseCase";
 import { GenerateOtpUseCase } from "../../../application/useCases/user/auth/GenerateOtpUseCase";
@@ -25,6 +25,7 @@ import { GetMessagesUseCase } from "../../../application/useCases/chat/GetMessag
 
 // Review Use Cases
 import { AddReviewUseCase } from "../../../application/useCases/user/review/AddReviewUseCase";
+import { GetAllReviewsUseCase } from "../../../application/useCases/user/review/GetAllReviewsUseCase";
 
 // Cloudinary Upload Service
 import { upload } from "../../../infrastructure/services/cloudinary/CloudinaryConfig";
@@ -54,7 +55,7 @@ import { TokenService } from '../../../infrastructure/services/jwt/TokenService'
 
 
 const router = express.Router();
-console.log("User routes file loaded");
+
 
 //  Initialize all service instances
 const cacheService = new RedisCacheService();
@@ -100,8 +101,9 @@ const chatController = new ChatController(checkChatAccessUseCase, getChatRoomUse
 
 // Review
 const reviewRepository = new ReviewRepository();
+const getAllReviewsUseCase = new GetAllReviewsUseCase(reviewRepository)
 const addReviewUseCase = new AddReviewUseCase(reviewRepository);
-const reviewController = new ReviewController(addReviewUseCase);
+const reviewController = new ReviewController(addReviewUseCase,getAllReviewsUseCase);
 
 const authController = new AuthController(
   registerUserUsecase,
@@ -169,5 +171,5 @@ router.post("/chat/upload", authMiddleware.execute, upload.single("file"), (req,
 
 // Review Routes
 router.post("/review", authMiddleware.execute, (req, res, next) => reviewController.addReview(req, res, next));
-
+router.get('/review/:id',authMiddleware.execute,(req,res,next)=>reviewController.getAllReview(req,res,next))
 export default router;

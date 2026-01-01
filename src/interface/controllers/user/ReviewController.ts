@@ -3,9 +3,9 @@ import { IAddReviewUseCase } from "../../../application/interface/use-cases/user
 import { AddReviewDTO } from "../../../application/dtos/user/review/AddReviewDTO";
 import { BadRequestError } from "../../../infrastructure/errors/BadRequestError";
 import { HttpStatusCode } from "../../../infrastructure/interface/enums/HttpStatusCode";
-
+import { IGetAllReviewsUseCase } from "../../../application/interface/use-cases/user/review/IGetAllReviewsUsecase";
 export class ReviewController {
-    constructor(private addReviewUseCase: IAddReviewUseCase) { }
+    constructor(private addReviewUseCase: IAddReviewUseCase,private allreviewusecase:IGetAllReviewsUseCase) { }
 
     async addReview(req: Request, res: Response, next: NextFunction) {
         try {
@@ -23,4 +23,17 @@ export class ReviewController {
             next(error);
         }
     }
+  async getAllReview(req:Request,res:Response,next:NextFunction){
+    try {
+        const lawyerId = req.params.id
+
+      const response =   await this.allreviewusecase.execute(lawyerId)
+     
+      res.status(HttpStatusCode.OK).json({data:response})
+    } catch (error) {
+        next(error)
+    }
+  }
+
+    
 }
