@@ -7,7 +7,7 @@ export class Booking {
         public startTime: string,
         public endTime: string,
         public consultationFee: number,
-        public status: 'pending' | 'confirmed' | 'cancelled',
+        public status: 'pending' | 'confirmed' | 'cancelled' | 'completed',
         public paymentStatus: 'pending' | 'paid' | 'failed',
         public paymentId?: string,
         public stripeSessionId?: string,

@@ -1,5 +1,6 @@
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository";
 import { IAvailabilityRuleRepository } from "../../../domain/repositories/lawyer/IAvailabilityRuleRepository";
+import { ILawyerRepository } from "../../../domain/repositories/lawyer/ILawyerRepository";
 import { ICancelAppointmentUseCase } from "../../interface/use-cases/user/ICancelAppointmentUseCase";
 import { IPaymentService } from "../../interface/services/IPaymentService";
 import { NotFoundError } from "../../../infrastructure/errors/NotFoundError";
@@ -9,7 +10,8 @@ export class CancelAppointmentUseCase implements ICancelAppointmentUseCase {
     constructor(
         private bookingRepository: IBookingRepository,
         private _slotRepo: IAvailabilityRuleRepository,
-        private _paymentService: IPaymentService
+        private _paymentService: IPaymentService,
+        private _lawyerRepo: ILawyerRepository
     ) { }
 
     async execute(bookingId: string, reason: string): Promise<void> {
@@ -46,9 +48,14 @@ export class CancelAppointmentUseCase implements ICancelAppointmentUseCase {
             refundStatus = 'partial';
         }
 
-    
+
         if (booking.paymentStatus === 'paid' && booking.paymentId) {
             await this._paymentService.refundPayment(booking.paymentId, refundAmount);
+
+
+            if (booking.status === 'completed') {
+                await this._lawyerRepo.updateWalletBalance(booking.lawyerId, -refundAmount);
+            }
         }
 
         await this.bookingRepository.updateStatus(bookingId, "cancelled", reason, {

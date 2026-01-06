@@ -24,4 +24,5 @@ export interface Lawyer {
   hasSubmittedVerification?: boolean;
   paymentVerify?: boolean;
   consultationFee?: number;
+  walletBalance?: number;
 }

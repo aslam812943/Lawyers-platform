@@ -26,6 +26,7 @@ export interface ILawyerDocument extends Document {
   paymentVerify?: boolean
   subscriptionId?: Types.ObjectId
   consultationFee: number;
+  walletBalance: number;
 }
 
 export interface Address {
@@ -67,7 +68,8 @@ const LawyerSchema = new Schema<ILawyerDocument>({
   bio: { type: String },
   paymentVerify: { type: Boolean, default: false },
   subscriptionId: { type: Schema.Types.ObjectId, ref: 'Subscription' },
-  consultationFee: { type: Number, default: 0 }
+  consultationFee: { type: Number, default: 0 },
+  walletBalance: { type: Number, default: 0 }
 
 }, { timestamps: true });
 

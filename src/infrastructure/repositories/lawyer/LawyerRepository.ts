@@ -331,9 +331,19 @@ export class LawyerRepository implements ILawyerRepository {
       profileImage: doc.Profileimageurl,
       bio: doc.bio,
       isPassword: doc.password ? true : false,
-      hasSubmittedVerification: doc.hasSubmittedVerification,
       paymentVerify: doc.paymentVerify,
-      consultationFee: doc.consultationFee
+      consultationFee: doc.consultationFee,
+      walletBalance: doc.walletBalance
     };
+  }
+
+  async updateWalletBalance(lawyerId: string, amount: number): Promise<void> {
+    try {
+      await LawyerModel.findByIdAndUpdate(lawyerId, {
+        $inc: { walletBalance: amount }
+      });
+    } catch (error: any) {
+      throw new InternalServerError("Database error while updating lawyer wallet balance.");
+    }
   }
 }

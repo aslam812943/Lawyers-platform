@@ -26,7 +26,7 @@ const BookingSchema: Schema = new Schema({
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },
     consultationFee: { type: Number, required: true },
-    status: { type: String, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'confirmed', 'cancelled', 'completed'], default: 'pending' },
     paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
     paymentId: { type: String },
     stripeSessionId: { type: String, unique: true },

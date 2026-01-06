@@ -44,7 +44,7 @@ import { GetMessagesUseCase } from "../../../application/useCases/chat/GetMessag
 import { BookingRepository } from "../../../infrastructure/repositories/user/BookingRepository";
 import { ChatRoomRepository } from "../../../infrastructure/repositories/ChatRoomRepository";
 import { MessageRepository } from "../../../infrastructure/repositories/messageRepository";
-import { ChatController } from "../../controllers/chat/ChatController";
+import { ChatController } from "../../controllers/common/chat/ChatController";
 
 
 
@@ -55,6 +55,11 @@ import { GetLawyerCasesUseCase } from "../../../application/useCases/lawyer/GetL
 import { LawyerCasesController } from "../../controllers/lawyer/LawyerCasesController";
 import { GetLawyerEarningsUseCase } from "../../../application/useCases/lawyer/GetLawyerEarningsUseCase";
 import { LawyerEarningsController } from "../../controllers/lawyer/LawyerEarningsController";
+import { WithdrawalRepository } from "../../../infrastructure/repositories/WithdrawalRepository";
+import { RequestPayoutUseCase } from "../../../application/useCases/lawyer/RequestPayoutUseCase";
+import { ApprovePayoutUseCase } from "../../../application/useCases/admin/ApprovePayoutUseCase";
+import { PayoutController } from "../../controllers/common/payout/PayoutController";
+
 const router = Router();
 
 // ============================================================================
@@ -93,7 +98,7 @@ const checkLawyerStatusUseCase = new CheckLawyerStatusUseCase(lawyerRepository);
 const tokenService = new TokenService();
 const lawyerAuthMiddleware = new LawyerAuthMiddleware(checkLawyerStatusUseCase, tokenService);
 const getAppoimentsUseCase = new GetAppoimentsUseCase(availabilityRuleRepository)
-const updateAppointmentStatusUseCase = new UpdateAppointmentStatusUseCase(availabilityRuleRepository, bookingRepository, stripeService);
+const updateAppointmentStatusUseCase = new UpdateAppointmentStatusUseCase(availabilityRuleRepository, bookingRepository, stripeService, lawyerRepository, subscriptionRepository);
 
 // Chat
 const checkChatAccessUseCase = new CheckChatAccessUseCase(bookingRepository);
@@ -114,8 +119,14 @@ const getLawyerCasesUseCase = new GetLawyerCasesUseCase(bookingRepository);
 const lawyerCasesController = new LawyerCasesController(getLawyerCasesUseCase);
 
 // Earnings
-const getLawyerEarningsUseCase = new GetLawyerEarningsUseCase(bookingRepository);
+const getLawyerEarningsUseCase = new GetLawyerEarningsUseCase(bookingRepository, lawyerRepository, subscriptionRepository);
 const lawyerEarningsController = new LawyerEarningsController(getLawyerEarningsUseCase);
+
+// Payout
+const withdrawalRepository = new WithdrawalRepository();
+const requestPayoutUseCase = new RequestPayoutUseCase(withdrawalRepository, lawyerRepository);
+const approvePayoutUseCase = new ApprovePayoutUseCase(withdrawalRepository, lawyerRepository, subscriptionRepository);
+const payoutController = new PayoutController(requestPayoutUseCase, approvePayoutUseCase, withdrawalRepository);
 
 // Availability Controller 
 const availabilityController = new AvailabilityController(
@@ -194,5 +205,8 @@ router.get(`/review/:id`, lawyerAuthMiddleware.execute, (req, res, next) => revi
 router.get('/cases', lawyerAuthMiddleware.execute, (req, res, next) => lawyerCasesController.getCases(req, res, next));
 
 router.get('/earnings', lawyerAuthMiddleware.execute, (req, res, next) => lawyerEarningsController.getEarnings(req, res, next));
+
+router.post('/payout/request', lawyerAuthMiddleware.execute, (req, res, next) => payoutController.requestPayout(req, res, next));
+router.get('/payout/history', lawyerAuthMiddleware.execute, (req, res, next) => payoutController.getLawyerWithdrawals(req, res, next));
 
 export default router;
