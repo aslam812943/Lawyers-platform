@@ -93,7 +93,7 @@ const checkLawyerStatusUseCase = new CheckLawyerStatusUseCase(lawyerRepository);
 const tokenService = new TokenService();
 const lawyerAuthMiddleware = new LawyerAuthMiddleware(checkLawyerStatusUseCase, tokenService);
 const getAppoimentsUseCase = new GetAppoimentsUseCase(availabilityRuleRepository)
-const updateAppointmentStatusUseCase = new UpdateAppointmentStatusUseCase(availabilityRuleRepository);
+const updateAppointmentStatusUseCase = new UpdateAppointmentStatusUseCase(availabilityRuleRepository, bookingRepository, stripeService);
 
 // Chat
 const checkChatAccessUseCase = new CheckChatAccessUseCase(bookingRepository);

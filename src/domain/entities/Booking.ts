@@ -14,7 +14,8 @@ export class Booking {
         public description?: string,
         public userName?: string,
         public cancellationReason?: string,
-        public lawyerName?: string
-
+        public lawyerName?: string,
+        public refundAmount?: number,
+        public refundStatus?: 'none' | 'full' | 'partial'
     ) { }
 }

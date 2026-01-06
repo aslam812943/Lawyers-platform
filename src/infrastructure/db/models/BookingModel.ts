@@ -13,6 +13,8 @@ export interface IBookingDocument extends Document {
     stripeSessionId?: string;
     description?: string;
     cancellationReason?: string;
+    refundAmount?: number;
+    refundStatus?: string;
 
 }
 
@@ -30,6 +32,8 @@ const BookingSchema: Schema = new Schema({
     stripeSessionId: { type: String, unique: true },
     description: { type: String },
     cancellationReason: { type: String },
+    refundAmount: { type: Number },
+    refundStatus: { type: String, enum: ['none', 'full', 'partial'], default: 'none' },
 }, { timestamps: true });
 
 export const BookingModel = mongoose.model<IBookingDocument>("Booking", BookingSchema);
