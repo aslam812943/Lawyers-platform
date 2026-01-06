@@ -315,9 +315,10 @@ export class LawyerRepository implements ILawyerRepository {
       password: doc.password,
       phone: doc.phone,
       role: doc.role,
+      hasSubmittedVerification:doc.hasSubmittedVerification,
       isBlock: doc.isBlock,
       googleId: doc.googleId,
-
+      
       barNumber: doc.barNumber,
       barAdmissionDate: doc.barAdmissionDate,
       yearsOfPractice: doc.yearsOfPractice,

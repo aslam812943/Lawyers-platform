@@ -30,7 +30,8 @@ export class BookingRepository implements IBookingRepository {
                 savedBooking.cancellationReason,
                 undefined,
                 savedBooking.refundAmount,
-                savedBooking.refundStatus as any
+                savedBooking.refundStatus as any,
+                (savedBooking as any).createdAt
             );
         } catch (error: any) {
             throw new InternalServerError("Database error while creating booking.");
@@ -58,7 +59,8 @@ export class BookingRepository implements IBookingRepository {
                 booking.cancellationReason,
                 undefined,
                 booking.refundAmount,
-                booking.refundStatus as any
+                booking.refundStatus as any,
+                (booking as any).createdAt
             );
         } catch (error: any) {
             throw new InternalServerError("Database error while fetching booking by ID.");
@@ -111,7 +113,10 @@ export class BookingRepository implements IBookingRepository {
                     booking.description,
                     undefined,
                     booking.cancellationReason,
-                    (booking.lawyerId as any)?.name
+                    (booking.lawyerId as any)?.name,
+                    booking.refundAmount,
+                    booking.refundStatus as any,
+                    (booking as any).createdAt
                 )),
                 total
             };
@@ -206,7 +211,12 @@ export class BookingRepository implements IBookingRepository {
                 booking.paymentId,
                 booking.stripeSessionId,
                 booking.description,
-                (booking.userId as any)?.name
+                (booking.userId as any)?.name,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                (booking as any).createdAt
             ));
         } catch (error: any) {
             throw new InternalServerError("Database error while fetching lawyer bookings.");

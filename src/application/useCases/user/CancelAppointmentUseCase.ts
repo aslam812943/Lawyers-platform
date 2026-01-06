@@ -35,12 +35,14 @@ export class CancelAppointmentUseCase implements ICancelAppointmentUseCase {
         appointmentDate.setHours(hours, minutes, 0, 0);
 
         const now = new Date();
+        const createdAt = booking.createdAt || now; 
+        const timeSinceBooking = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
         const diffInHours = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
         let refundAmount = 0;
         let refundStatus: 'full' | 'partial' = 'full';
 
-        if (diffInHours >= 24) {
+        if (diffInHours >= 24 || timeSinceBooking < 24) {
             refundAmount = booking.consultationFee;
             refundStatus = 'full';
         } else {

@@ -7,7 +7,7 @@ export class Booking {
         public startTime: string,
         public endTime: string,
         public consultationFee: number,
-        public status: 'pending' | 'confirmed' | 'cancelled' | 'completed',
+        public status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rejected',
         public paymentStatus: 'pending' | 'paid' | 'failed',
         public paymentId?: string,
         public stripeSessionId?: string,
@@ -16,6 +16,7 @@ export class Booking {
         public cancellationReason?: string,
         public lawyerName?: string,
         public refundAmount?: number,
-        public refundStatus?: 'none' | 'full' | 'partial'
+        public refundStatus?: 'none' | 'full' | 'partial',
+        public createdAt?: Date
     ) { }
 }
