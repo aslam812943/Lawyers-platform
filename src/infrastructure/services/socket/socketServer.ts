@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
-import { SendMessageUseCase } from '../../../application/useCases/chat/SendMessageUseCase';
-import { MarkMessagesAsReadUseCase } from '../../../application/useCases/chat/MarkMessagesAsReadUseCase';
+import { SendMessageUseCase } from '../../../application/useCases/common/chat/SendMessageUseCase';
+import { MarkMessagesAsReadUseCase } from '../../../application/useCases/common/chat/MarkMessagesAsReadUseCase';
 import { MessageRepository } from '../../repositories/messageRepository';
 import { SocketAuthService } from './socketAuth';
 import { JoinRoomPayload, SendMessagePayload, MarkReadPayload, VideoJoinPayload, VideoSignalPayload } from './socketTypes';
@@ -91,7 +91,7 @@ export class SocketServerService implements ISocketServer {
         const role = socket.data.role;
 
         if (role === 'user') {
-        
+
           const clients = io.sockets.adapter.rooms.get(videoRoomId);
           let lawyerPresent = false;
           if (clients) {
@@ -110,7 +110,7 @@ export class SocketServerService implements ISocketServer {
         }
 
         socket.join(videoRoomId);
-       
+
         socket.to(videoRoomId).emit("video-call-peer-joined", {
           userId: socket.data.userId,
           socketId: socket.id,
@@ -120,7 +120,7 @@ export class SocketServerService implements ISocketServer {
 
       socket.on("video-call-signal", ({ bookingId, signal }: VideoSignalPayload) => {
         const videoRoomId = `video-${bookingId}`;
-       
+
         socket.to(videoRoomId).emit("video-call-signal", {
           signal,
           from: socket.data.userId,
@@ -132,7 +132,7 @@ export class SocketServerService implements ISocketServer {
       socket.on("video-call-end", ({ bookingId }: VideoJoinPayload) => {
         const videoRoomId = `video-${bookingId}`;
         io.to(videoRoomId).emit("video-call-ended");
-     
+
       });
 
       socket.on("disconnect", () => {

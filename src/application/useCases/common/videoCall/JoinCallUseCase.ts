@@ -1,5 +1,5 @@
 import { IBookingRepository } from "../../../../domain/repositories/IBookingRepository";
-import { IJoinCallUseCase } from "../../../interface/use-cases/user/IJoinCallUseCase";
+import { IJoinCallUseCase } from "../../../interface/use-cases/common/IJoinCallUseCase";
 import { NotFoundError } from "../../../../infrastructure/errors/NotFoundError";
 
 export class JoinCallUseCase implements IJoinCallUseCase {
@@ -11,7 +11,7 @@ export class JoinCallUseCase implements IJoinCallUseCase {
             throw new NotFoundError("Booking not found");
         }
 
-        
+
         await this.bookingRepository.updateCallStatus(bookingId, true, true);
     }
 }

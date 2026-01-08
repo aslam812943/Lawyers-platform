@@ -147,12 +147,23 @@ export class BookingRepository implements IBookingRepository {
 
     async findActiveBooking(userId: string, lawyerId: string): Promise<Booking | null> {
         try {
-            const booking = await BookingModel.findOne({
+            // Priority 1: Confirmed and Paid
+            let booking = await BookingModel.findOne({
                 userId,
                 lawyerId,
-                status: { $in: ['confirmed', 'pending'] },
+                status: 'confirmed',
                 paymentStatus: 'paid'
             }).sort({ createdAt: -1 });
+
+            // Priority 2: Pending and Paid
+            if (!booking) {
+                booking = await BookingModel.findOne({
+                    userId,
+                    lawyerId,
+                    status: 'pending',
+                    paymentStatus: 'paid'
+                }).sort({ createdAt: -1 });
+            }
 
             if (!booking) return null;
 

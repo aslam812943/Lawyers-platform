@@ -14,10 +14,7 @@ import { UserAuthMiddleware } from "../../middlewares/UserAuthMiddleware";
 import { TokenService } from "../../../infrastructure/services/jwt/TokenService";
 import { UserRepository } from "../../../infrastructure/repositories/user/UserRepository";
 import { CheckUserStatusUseCase } from "../../../application/useCases/user/checkUserStatusUseCase";
-import { CanJoinCallUseCase } from "../../../application/useCases/user/booking/CanJoinCallUseCase";
-import { JoinCallUseCase } from "../../../application/useCases/user/booking/JoinCallUseCase";
-
-import { commonAuthMiddleware } from "../../middlewares/CommonAuthMiddleware";
+import { ChatRoomRepository } from "../../../infrastructure/repositories/ChatRoomRepository";
 
 const router = Router();
 
@@ -26,21 +23,18 @@ const bookingRepository = new BookingRepository();
 const availabilityRuleRepository = new AvailabilityRuleRepository();
 const lawyerRepository = new LawyerRepository();
 const paymentRepository = new PaymentRepository();
+const chatRoomRepository = new ChatRoomRepository();
 
 const createBookingPaymentUseCase = new CreateBookingPaymentUseCase(stripeService);
-const confirmBookingUseCase = new ConfirmBookingUseCase(bookingRepository, stripeService, availabilityRuleRepository, lawyerRepository, paymentRepository);
+const confirmBookingUseCase = new ConfirmBookingUseCase(bookingRepository, stripeService, availabilityRuleRepository, lawyerRepository, paymentRepository, chatRoomRepository);
 const getUserAppointmentsUseCase = new GetUserAppointmentsUseCase(bookingRepository);
-const cancelAppointmentUseCase = new CancelAppointmentUseCase(bookingRepository, availabilityRuleRepository, stripeService, lawyerRepository);
-const canJoinCallUseCase = new CanJoinCallUseCase(bookingRepository);
-const joinCallUseCase = new JoinCallUseCase(bookingRepository);
+const cancelAppointmentUseCase = new CancelAppointmentUseCase(bookingRepository, availabilityRuleRepository, stripeService, lawyerRepository, chatRoomRepository);
 
 const bookingController = new BookingController(
     createBookingPaymentUseCase,
     confirmBookingUseCase,
     getUserAppointmentsUseCase,
-    cancelAppointmentUseCase,
-    canJoinCallUseCase,
-    joinCallUseCase
+    cancelAppointmentUseCase
 );
 
 const userRepository = new UserRepository();
@@ -52,8 +46,6 @@ router.post("/create-checkout-session", (req, res, next) => bookingController.in
 router.post("/confirm", (req, res, next) => bookingController.confirmBooking(req, res, next));
 router.get("/appointments", (req, res, next) => authMiddleware.execute(req, res, next), (req, res, next) => bookingController.getAppointments(req, res, next));
 router.patch("/appointments/:id/cancel", (req, res, next) => authMiddleware.execute(req, res, next), (req, res, next) => bookingController.cancelAppointment(req, res, next));
-router.get("/appointments/:bookingId/can-join", commonAuthMiddleware, (req, res, next) => bookingController.canJoinCall(req, res, next));
-router.post("/appointments/:bookingId/join", commonAuthMiddleware, (req, res, next) => bookingController.joinCall(req, res, next));
 
 export default router;
 

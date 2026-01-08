@@ -1,6 +1,7 @@
 import { ChatRoom } from "../entities/ChatRoom";
 import { IChatRoomDocument } from "../../infrastructure/db/models/ChatRoomModel";
 import { Document, Types } from "mongoose";
+import { IBookingRepository } from "./IBookingRepository";
 
 export interface PopulatedUser {
     _id: Types.ObjectId;
@@ -42,4 +43,5 @@ export interface IChatRoomRepository {
     findByLawyerId(lawyerId: string): Promise<PopulatedChatRoom[]>;
     findByUserId(userId: string): Promise<PopulatedChatRoom[]>;
     updateBookingId(roomId: string, bookingId: string): Promise<void>;
+    syncChatRoom(userId: string, lawyerId: string, bookingRepo: IBookingRepository): Promise<void>;
 }

@@ -10,8 +10,7 @@ interface JwtPayload {
 export const commonAuthMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const token =
-            req.cookies?.userAccessToken ||
-            req.cookies?.lawyerAccessToken ||
+            req.cookies?.accessToken ||
             req.headers.authorization?.split(" ")[1];
 
         if (!token) {

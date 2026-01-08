@@ -1,5 +1,5 @@
 import { IBookingRepository } from "../../../../domain/repositories/IBookingRepository";
-import { ICanJoinCallUseCase } from "../../../interface/use-cases/user/ICanJoinCallUseCase";
+import { ICanJoinCallUseCase } from "../../../interface/use-cases/common/ICanJoinCallUseCase";
 import { NotFoundError } from "../../../../infrastructure/errors/NotFoundError";
 
 export class CanJoinCallUseCase implements ICanJoinCallUseCase {
@@ -7,12 +7,12 @@ export class CanJoinCallUseCase implements ICanJoinCallUseCase {
 
     async execute(bookingId: string, userId: string, role: 'user' | 'lawyer'): Promise<{ canJoin: boolean; message: string }> {
         const booking = await this.bookingRepository.findById(bookingId);
-        
+
         if (!booking) {
             throw new NotFoundError("Booking not found");
         }
 
-       
+
         if (role === 'user' && booking.userId.toString() !== userId) {
             return { canJoin: false, message: "Unauthorized: You are not a participant in this booking" };
         }
@@ -20,12 +20,12 @@ export class CanJoinCallUseCase implements ICanJoinCallUseCase {
             return { canJoin: false, message: "Unauthorized: You are not the assigned lawyer for this booking" };
         }
 
-        
+        console.log(booking)
         if (booking.status !== 'confirmed' || booking.paymentStatus !== 'paid') {
             return { canJoin: false, message: "Valid confirmed booking required" };
         }
 
-        
+
         /*
         const now = new Date();
         const start = this.parseTime(booking.date, booking.startTime);
@@ -40,7 +40,7 @@ export class CanJoinCallUseCase implements ICanJoinCallUseCase {
         }
         */
 
-        
+
         if (role === 'user' && !booking.lawyerJoined) {
             return { canJoin: false, message: "Please wait for the lawyer to join the call" };
         }
@@ -49,7 +49,7 @@ export class CanJoinCallUseCase implements ICanJoinCallUseCase {
     }
 
     private parseTime(dateStr: string, timeStr: string): Date {
-       
+
         const date = new Date(dateStr);
         const [time, modifier] = timeStr.split(' ');
         let [hours, minutes] = time.split(':').map(Number);
