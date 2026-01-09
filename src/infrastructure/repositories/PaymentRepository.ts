@@ -70,14 +70,21 @@ export class PaymentRepository implements IPaymentRepository {
         };
     }
 
-    async getDashboardStats(): Promise<any> {
+    async getDashboardStats(startDate?: Date, endDate?: Date): Promise<any> {
         const now = new Date();
-        const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+        const dateFilter: any = {};
+        if (startDate || endDate) {
+            const range: any = {};
+            if (startDate) range.$gte = startDate;
+            if (endDate) range.$lte = endDate;
+            dateFilter.createdAt = range;
+        }
 
         const [revenueStats, bookingStats, withdrawalStats, topLawyers, monthlyRevenue] = await Promise.all([
-            
+
             BookingModel.aggregate([
-                { $match: { paymentStatus: 'paid' } },
+                { $match: { paymentStatus: 'paid', ...dateFilter } },
                 {
                     $lookup: {
                         from: 'lawyers',
@@ -114,6 +121,7 @@ export class PaymentRepository implements IPaymentRepository {
 
             // Booking Stats
             BookingModel.aggregate([
+                { $match: dateFilter },
                 {
                     $group: {
                         _id: '$status',
@@ -124,6 +132,7 @@ export class PaymentRepository implements IPaymentRepository {
 
             // Withdrawal Stats
             WithdrawalModel.aggregate([
+                { $match: dateFilter },
                 {
                     $group: {
                         _id: null,
@@ -143,7 +152,7 @@ export class PaymentRepository implements IPaymentRepository {
 
             // Top Performing Lawyers
             BookingModel.aggregate([
-                { $match: { paymentStatus: 'paid' } },
+                { $match: { paymentStatus: 'paid', ...dateFilter } },
                 {
                     $group: {
                         _id: '$lawyerId',
@@ -171,7 +180,7 @@ export class PaymentRepository implements IPaymentRepository {
                 }
             ]),
 
-            // Monthly Revenue (last 6 months)
+           
             BookingModel.aggregate([
                 {
                     $match: {
@@ -197,7 +206,8 @@ export class PaymentRepository implements IPaymentRepository {
             completed: 0,
             cancelled: 0,
             pending: 0,
-            rejected: 0
+            rejected: 0,
+            confirmed: 0
         };
         bookingStats.forEach((stat: any) => {
             if (stat._id in formattedBookingStats) {

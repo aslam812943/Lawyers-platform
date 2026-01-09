@@ -8,6 +8,7 @@ export interface DashboardStatsDTO {
         cancelled: number;
         pending: number;
         rejected: number;
+        confirmed: number;
     };
     withdrawalStats: {
         totalWithdrawn: number;
